@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Gestão de Clientes + ChatGPT IA</title>
+
+  <!-- Bootstrap 5.3 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #334155;
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    .kpi-card {
+      border: none;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      transition: transform 0.2s ease;
+    }
+    .kpi-card:hover { transform: translateY(-3px); }
+
+    .kpi-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .main-card {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+      background: #ffffff;
+    }
+
+    .table { vertical-align: middle; }
+    .table > :not(caption) > * > * {
+      padding: 1rem 1.25rem;
+      border-bottom-color: #f1f5f9;
+    }
+    .table thead th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      color: #64748b;
+      background-color: #f8fafc;
+    }
+
+    .avatar-initials {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .modal-content {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+      color: #fff;
+      padding: .85rem 1.25rem;
+    }
+
+    .ai-box {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e0eefd 100%);
+      border: 1px solid #bae0ff;
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .form-control, .form-select {
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      font-size: .84rem;
+    }
+
+    .badge-vip { background-color: #f3e8ff; color: #6b21a8; }
+    .badge-regular { background-color: #e0f2fe; color: #0369a1; }
+    .badge-prospect { background-color: #fef3c7; color: #92400e; }
+  </style>
+</head>
+<body>
+
+<div class="container py-4" style="max-width: 1200px;">
+
+  <!-- Cabeçalho -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+      <h3 class="fw-bold m-0 text-dark"><i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard de Clientes</h3>
+      <p class="text-muted m-0 small">Visão geral do sistema e integração com Inteligência Artificial</p>
+    </div>
+    <button class="btn btn-primary fw-semibold shadow-sm px-3" onclick="abrirModalNovo()">
+      <i class="bi bi-person-plus-fill me-2"></i>Novo Cliente
+    </button>
+  </div>
+
+  <!-- Cards de KPI / Estatísticas -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card kpi-card p-3 bg-white">
+        <div class="d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-primary-subtle text-primary"><i class="bi bi-people-fill"></i></div>
+          <div>
+            <div class="text-muted small fw-medium">Total de Clientes</div>
+            <h4 class="fw-bold m-0" id="kpiTotal">0</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card kpi-card p-3 bg-white">
+        <div class="d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-purple-subtle text-purple" style="background: #f3e8ff; color: #6b21a8;"><i class="bi bi-star-fill"></i></div>
+          <div>
+            <div class="text-muted small fw-medium">Clientes VIP</div>
+            <h4 class="fw-bold m-0" id="kpiVip">0</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card kpi-card p-3 bg-white">
+        <div class="d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-success-subtle text-success"><i class="bi bi-magic"></i></div>
+          <div>
+            <div class="text-muted small fw-medium">Preenchidos via IA</div>
+            <h4 class="fw-bold m-0" id="kpiIa">0</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card kpi-card p-3 bg-white">
+        <div class="d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-info-subtle text-info"><i class="bi bi-check-circle-fill"></i></div>
+          <div>
+            <div class="text-muted small fw-medium">Ativos no Sistema</div>
+            <h4 class="fw-bold m-0" id="kpiAtivos">0</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela de Dados e Filtros -->
+  <div class="card main-card">
+    <div class="card-header bg-white border-0 p-4 pb-0">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-5">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+            <input type="text" id="inputBusca" class="form-control border-start-0 ps-0" placeholder="Pesquisar por nome, CPF ou e-mail..." oninput="filtrarClientes()">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select id="filtroCategoria" class="form-select" onchange="filtrarClientes()">
+            <option value="">Todas as Categorias</option>
+            <option value="VIP">VIP</option>
+            <option value="Regular">Regular</option>
+            <option value="Prospect">Prospect</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select id="filtroStatus" class="form-select" onchange="filtrarClientes()">
+            <option value="">Todos os Status</option>
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+            <option value="Pendente">Pendente</option>
+          </select>
+        </div>
+        <div class="col-md-1 text-end">
+          <button class="btn btn-outline-secondary w-100" onclick="limparFiltrosGrid()" title="Limpar Filtros"><i class="bi bi-funnel-fill"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body p-0 mt-3">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Contato</th>
+              <th>Localização</th>
+              <th>Categoria</th>
+              <th>Status</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaClientes"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-footer bg-white border-0 p-4 text-muted small d-flex justify-content-between">
+      <span id="totalRegistros">Exibindo 0 clientes</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL COM ASSISTENTE CHATGPT -->
+<div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="modalTitulo"><i class="bi bi-person-plus me-2"></i>Cadastrar Cliente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        
+        <div class="ai-box mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="fw-bold text-primary small"><i class="bi bi-stars me-1"></i> Preenchimento Automático com ChatGPT</span>
+            <span class="badge bg-success-subtle text-success"><i class="bi bi-shield-lock-fill me-1"></i>Chave protegida no servidor</span>
+          </div>
+
+          <div class="input-group">
+            <input type="text" id="promptIA" class="form-control" placeholder="Ex: Cliente VIP de Curitiba que trabalha com TI (ou deixe em branco para aleatório)">
+            <button type="button" id="btnIA" class="btn btn-primary fw-semibold" onclick="gerarDadosComIA()">
+              <i class="bi bi-magic me-1"></i> Preencher com IA
+            </button>
+          </div>
+        </div>
+
+        <form id="formCliente">
+          <input type="hidden" id="clienteId">
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label fw-bold small text-muted">Nome Completo</label>
+              <input type="text" class="form-control" id="nome" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold small text-muted">CPF</label>
+              <input type="text" class="form-control" id="cpf" maxlength="14" oninput="aplicarMascaraCPF(this)" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-muted">E-mail</label>
+              <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-muted">Telefone / WhatsApp</label>
+              <input type="tel" class="form-control" id="telefone" maxlength="15" oninput="aplicarMascaraTelefone(this)" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-bold small text-muted">CEP</label>
+              <input type="text" class="form-control" id="cep" maxlength="9" oninput="aplicarMascaraCEP(this)">
+            </div>
+            <div class="col-md-7">
+              <label class="form-label fw-bold small text-muted">Logradouro / Rua</label>
+              <input type="text" class="form-control" id="logradouro">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-bold small text-muted">Nº</label>
+              <input type="text" class="form-control" id="numero">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label fw-bold small text-muted">Bairro</label>
+              <input type="text" class="form-control" id="bairro">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label fw-bold small text-muted">Cidade</label>
+              <input type="text" class="form-control" id="cidade">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-bold small text-muted">UF</label>
+              <select class="form-select" id="estado">
+                <option value="SP">SP</option><option value="RJ">RJ</option><option value="MG">MG</option>
+                <option value="PR">PR</option><option value="RS">RS</option><option value="SC">SC</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-muted">Categoria</label>
+              <select class="form-select" id="categoria">
+                <option value="VIP">Cliente VIP</option>
+                <option value="Regular">Cliente Regular</option>
+                <option value="Prospect">Prospect</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-muted">Status</label>
+              <select class="form-select" id="status">
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+                <option value="Pendente">Pendente</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg me-1"></i>Salvar Cliente</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // O navegador nunca recebe a chave da OpenAI. Ele conversa somente com o backend.
+  const API_ENDPOINT = "http://localhost:5000/api/clientes/gerar";
+  let formularioPreenchidoPorIa = false;
+  let clientes = [
+    {
+      id: 101, nome: "Jean Silva", cpf: "123.456.789-09", email: "jean.silva@exemplo.com",
+      telefone: "(11) 91234-5678", cep: "01311-200", logradouro: "Avenida Paulista", numero: "1578",
+      bairro: "Bela Vista", cidade: "São Paulo", estado: "SP", categoria: "VIP", status: "Ativo", viaIa: true
+    },
+    {
+      id: 102, nome: "Mariana Silva Santos", cpf: "341.982.708-12", email: "mariana.santos@email.com",
+      telefone: "(11) 98765-4321", cep: "01310-100", logradouro: "Av. Paulista", numero: "1000",
+      bairro: "Bela Vista", cidade: "São Paulo", estado: "SP", categoria: "VIP", status: "Ativo", viaIa: false
+    }
+  ];
+
+  let bsModal;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    bsModal = new bootstrap.Modal(document.getElementById('modalCliente'));
+    atualizarDashboard();
+  });
+
+  function atualizarDashboard() {
+    filtrarClientes();
+    document.getElementById("kpiTotal").innerText = clientes.length;
+    document.getElementById("kpiVip").innerText = clientes.filter(c => c.categoria === "VIP").length;
+    document.getElementById("kpiIa").innerText = clientes.filter(c => c.viaIa).length;
+    document.getElementById("kpiAtivos").innerText = clientes.filter(c => c.status === "Ativo").length;
+  }
+
+  async function gerarDadosComIA() {
+    const promptUser = document.getElementById("promptIA").value.trim() || "Gere um cadastro de cliente brasileiro realista.";
+    const btn = document.getElementById("btnIA");
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Gerando...';
+
+    try {
+      const response = await fetch(API_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ prompt: promptUser })
+      });
+
+      if (!response.ok) {
+        const erro = await response.json().catch(() => null);
+        throw new Error(erro?.message || `Erro HTTP ${response.status}`);
+      }
+
+      const clienteIA = await response.json();
+
+      document.getElementById("nome").value = clienteIA.nome || "";
+      document.getElementById("cpf").value = clienteIA.cpf || "";
+      document.getElementById("email").value = clienteIA.email || "";
+      document.getElementById("telefone").value = clienteIA.telefone || "";
+      document.getElementById("cep").value = clienteIA.cep || "";
+      document.getElementById("logradouro").value = clienteIA.logradouro || "";
+      document.getElementById("numero").value = clienteIA.numero || "";
+      document.getElementById("bairro").value = clienteIA.bairro || "";
+      document.getElementById("cidade").value = clienteIA.cidade || "";
+      document.getElementById("estado").value = clienteIA.estado || "SP";
+      document.getElementById("categoria").value = clienteIA.categoria || "Regular";
+      document.getElementById("status").value = clienteIA.status || "Ativo";
+
+      formularioPreenchidoPorIa = true;
+      alert("Campos preenchidos automaticamente pelo ChatGPT!");
+    } catch (error) {
+      const mensagem = error instanceof TypeError
+        ? "Não foi possível acessar o backend. Inicie a API em http://localhost:5000."
+        : error.message;
+      alert("Falha ao gerar dados: " + mensagem);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-magic me-1"></i> Preencher com IA';
+    }
+  }
+
+  function aplicarMascaraCPF(i) {
+    let v = i.value.replace(/\D/g, "");
+    v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    i.value = v;
+  }
+  function aplicarMascaraTelefone(i) {
+    let v = i.value.replace(/\D/g, "");
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
+    i.value = v;
+  }
+  function aplicarMascaraCEP(i) {
+    let v = i.value.replace(/\D/g, "");
+    v = v.replace(/^(\d{5})(\d)/, "$1-$2");
+    i.value = v;
+  }
+
+  function filtrarClientes() {
+    const termo = document.getElementById("inputBusca").value.toLowerCase();
+    const cat = document.getElementById("filtroCategoria").value;
+    const stat = document.getElementById("filtroStatus").value;
+
+    const filtrados = clientes.filter(c => 
+      (c.nome.toLowerCase().includes(termo) || c.email.toLowerCase().includes(termo) || c.cpf.includes(termo)) &&
+      (cat === "" || c.categoria === cat) &&
+      (stat === "" || c.status === stat)
+    );
+    renderizarTabela(filtrados);
+  }
+
+  function limparFiltrosGrid() {
+    document.getElementById("inputBusca").value = "";
+    document.getElementById("filtroCategoria").value = "";
+    document.getElementById("filtroStatus").value = "";
+    filtrarClientes();
+  }
+
+  function renderizarTabela(lista) {
+    const tbody = document.getElementById("tabelaClientes");
+    tbody.innerHTML = "";
+    if (lista.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Nenhum cliente encontrado.</td></tr>`;
+      document.getElementById("totalRegistros").innerText = "Exibindo 0 clientes";
+      return;
+    }
+
+    lista.forEach(c => {
+      const iniciais = c.nome.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
+      const badgeCat = c.categoria === 'VIP' ? 'badge-vip' : (c.categoria === 'Regular' ? 'badge-regular' : 'badge-prospect');
+      const badgeStat = c.status === 'Ativo' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary';
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>
+          <div class="d-flex align-items-center gap-3">
+            <div class="avatar-initials">${escapeHtml(iniciais)}</div>
+            <div><div class="fw-bold text-dark">${escapeHtml(c.nome)}</div><div class="text-muted small">${escapeHtml(c.email)}</div></div>
+          </div>
+        </td>
+        <td><div class="small fw-medium">${escapeHtml(c.telefone)}</div><div class="text-muted small">${escapeHtml(c.cpf)}</div></td>
+        <td><div class="small">${escapeHtml(c.cidade)} - ${escapeHtml(c.estado)}</div></td>
+        <td><span class="badge ${badgeCat} px-2 py-1 rounded-2">${escapeHtml(c.categoria)}</span></td>
+        <td><span class="badge ${badgeStat} px-2 py-1 rounded-pill">${escapeHtml(c.status)}</span></td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-light text-danger" onclick="excluirCliente(${c.id})"><i class="bi bi-trash-fill"></i></button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById("totalRegistros").innerText = `Exibindo ${lista.length} de ${clientes.length} cliente(s)`;
+  }
+
+  function abrirModalNovo() {
+    document.getElementById("formCliente").reset();
+    document.getElementById("clienteId").value = "";
+    formularioPreenchidoPorIa = false;
+    bsModal.show();
+  }
+
+  function escapeHtml(valor) {
+    return String(valor ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  document.getElementById("formCliente").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const novo = {
+      id: Date.now(),
+      nome: document.getElementById("nome").value,
+      cpf: document.getElementById("cpf").value,
+      email: document.getElementById("email").value,
+      telefone: document.getElementById("telefone").value,
+      cep: document.getElementById("cep").value,
+      logradouro: document.getElementById("logradouro").value,
+      numero: document.getElementById("numero").value,
+      bairro: document.getElementById("bairro").value,
+      cidade: document.getElementById("cidade").value,
+      estado: document.getElementById("estado").value,
+      categoria: document.getElementById("categoria").value,
+      status: document.getElementById("status").value,
+      viaIa: formularioPreenchidoPorIa
+    };
+    clientes.unshift(novo);
+    bsModal.hide();
+    atualizarDashboard();
+  });
+
+  function excluirCliente(id) {
+    if (confirm("Deseja remover este cliente?")) {
+      clientes = clientes.filter(c => c.id !== id);
+      atualizarDashboard();
+    }
+  }
+</script>
+
+</body>
+</html>
